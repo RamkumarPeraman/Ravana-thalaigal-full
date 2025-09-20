@@ -10,7 +10,7 @@ export default function HomePage() {
     donations: 0,
     beneficiaries: 0,
     events: 0,
-    volunteers: 0
+    volunteers: 1
   })
 
   const testimonials = [
