@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  firstName             String    @db.VarChar(50)
+  lastName              String    @db.VarChar(50)
+  email                 String    @unique @db.VarChar(255)
+  password              String?   @db.VarChar(255)
+  phone                 String    @db.VarChar(15)
+  dateOfBirth           DateTime
+  gender                Gender
+  
+  // Address
+  street                String    @db.VarChar(255)
+  city                  String    @db.VarChar(100)
+  state                 String    @default("Tamil Nadu") @db.VarChar(100)
+  pincode               String    @db.VarChar(6)
+  
+  // Optional fields
+  occupation            String?   @db.VarChar(100)
+  organization          String?   @db.VarChar(100)
+  profileImage          String?   @db.Text
+  
+  // User type and permissions
+  userType              UserType  @default(MEMBER)
+  memberID              String?   @unique @db.VarChar(20)
+  
+  // Interests (stored as JSON)
+  interests             Json?
+  howDidYouHear         String?   @db.VarChar(100)
+  
+  // Emergency contact
+  emergencyContactName  String?   @db.VarChar(100)
+  emergencyContactPhone String?   @db.VarChar(15)
+  
+  // Preferences
+  subscribeNewsletter   Boolean   @default(true)
+  
+  // Account status
+  isVerified            Boolean   @default(false)
+  isActive              Boolean   @default(true)
+  verificationToken     String?   @db.VarChar(255)
+  resetPasswordToken    String?   @db.VarChar(255)
+  resetPasswordExpire   DateTime?
+  
+  // OAuth
+  googleId              String?   @unique @db.VarChar(255)
+  
+  // Activity tracking
+  lastLogin             DateTime?
+  loginCount            Int       @default(0)
+  membershipDate        DateTime  @default(now())
+  
+  // Timestamps
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  @@map("users")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum UserType {
+  MEMBER
+  VOLUNTEER
+  ADMIN
+}
