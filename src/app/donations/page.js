@@ -197,9 +197,12 @@ export default function DonationsPage() {
       // Save donation (simulate API call)
       console.log('Donation submitted:', donationData)
       
-      // Redirect to success page or show success message
-      router.push(`/donation-success?amount=${donationAmount}&cause=${selectedCause}`)
-
+  useEffect(() => {
+    if (!amount || !cause) {
+      router.replace("/donations") // fallback page
+    }
+  }, [amount, cause, router])
+  
     } catch (error) {
       console.error('Donation error:', error)
       alert('Payment failed. Please try again.')
