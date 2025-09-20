@@ -1,0 +1,9 @@
+# Database
+DATABASE_URL="mysql://root:123456@localhost:3306/raavana_thalaigal_trust"
+
+# JWT
+JWT_SECRET="raavana-thalaigal-trust-super-secret-jwt-key-2025-very-long-and-secure"
+JWT_EXPIRES_IN="30d"
+
+# App Configuration
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
