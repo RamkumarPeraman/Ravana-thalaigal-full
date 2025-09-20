@@ -63,10 +63,10 @@ export default function Navigation() {
 
     const getUserInitials = (user) => {
         if (!user) return 'U'   
-        if (user.user.firstName) {
+        if (user.firstName) {
             return `${user.user.firstName.charAt(0)}${user.user.lastName ? user.user.lastName.charAt(0) : ''}`.toUpperCase()
         }
-        if (user.user.email) {
+        if (user.email) {
             return user.user.email.charAt(0).toUpperCase()
         }
         return 'U'

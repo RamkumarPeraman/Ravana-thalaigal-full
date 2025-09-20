@@ -81,26 +81,42 @@ export default function AboutPage() {
         </section>
 
         {/* Milestones */}
-        <section className="space-y-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center">Our Milestones</h2>
-          <div className="space-y-6">
-            {[
-              { year: '2010', label: 'Founded by 5 volunteers' },
-              { year: '2012', label: 'First medical camp for 300 villagers' },
-              { year: '2015', label: 'Launched primary education program' },
-              { year: '2018', label: '5000 trees planted across rural areas' },
-              { year: '2020', label: 'Helped 2000 families during COVID-19' },
-              { year: '2023', label: 'Reached 10,000 beneficiaries' }
-            ].map((m, i) => (
-              <div key={i} className="flex items-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl">
-                  {m.year}
-                </div>
-                <p className="ml-6 text-gray-700">{m.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+{/* Our Milestones */}
+<section className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+  <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-16">Our Milestones</h2>
+
+  <div className="relative">
+    {/* Vertical timeline line */}
+    <div className="absolute left-1/2 top-0 -translate-x-1/2 w-2 bg-green-600 h-full"></div>
+
+    {[
+      { year: '2010', label: 'Founded by 5 volunteers' },
+      { year: '2012', label: 'First medical camp for 300 villagers' },
+      { year: '2015', label: 'Launched primary education program' },
+      { year: '2018', label: '5000 trees planted across rural areas' },
+      { year: '2020', label: 'Helped 2000 families during COVID-19' },
+      { year: '2023', label: 'Reached 10,000 beneficiaries' },
+    ].map((milestone, idx) => (
+      <div
+        key={idx}
+        className={`mb-12 flex w-full max-w-2xl mx-auto items-center ${
+          idx % 2 === 0 ? 'flex-row-reverse' : 'flex-row'
+        }`}
+      >
+        {/* Year circle */}
+        <div className="z-10 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-green-400 to-green-600 font-bold text-white shadow-lg">
+          {milestone.year}
+        </div>
+
+        {/* Content card */}
+        <div className="w-5/12 rounded-lg bg-white p-6 shadow-lg text-gray-800">
+          <p className="text-lg font-semibold">{milestone.label}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
 
         {/* Leadership Team */}
         <section className="space-y-8">

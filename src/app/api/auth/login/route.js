@@ -8,20 +8,21 @@ export async function POST(request) {
   
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, loginRole } = body;
 
     console.log('📧 Email:', email);
     console.log('🔑 Password length:', password?.length);
+    console.log('⚙️ Login Role:', loginRole);
 
-    if (!email || !password) {
-      console.log('❌ Missing credentials');
+    if (!email || !password || !loginRole) {
+      console.log('❌ Missing credentials or login role');
       return NextResponse.json(
-        { success: false, message: 'Email and password required' },
+        { success: false, message: 'Email, password and login role required' },
         { status: 400 }
       );
     }
 
-    // Find user
+    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: email }
     });
@@ -40,14 +41,11 @@ export async function POST(request) {
       id: user.id,
       email: user.email,
       hasPassword: !!user.password,
-      active: user.isActive
+      active: user.isActive,
+      userType: user.userType
     });
 
-    // Direct bcrypt comparison
-    console.log('🔍 Comparing passwords...');
-    console.log('Input password:', password);
-    console.log('Hash from DB:', user.password?.substring(0, 30) + '...');
-    
+    // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password);
     console.log('✅ Password match:', passwordMatch);
 
@@ -59,7 +57,16 @@ export async function POST(request) {
       );
     }
 
-    // Generate token
+    // Check role matches (case-insensitive)
+    if (user.userType.toUpperCase() !== loginRole.toUpperCase()) {
+      console.log('❌ Login role mismatch:', user.userType, loginRole);
+      return NextResponse.json(
+        { success: false, message: `You are not authorized to login as ${loginRole}` },
+        { status: 403 }
+      );
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,

@@ -1,80 +1,84 @@
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 
+// Generates the PDF document for a donation receipt
 export const generateReceiptPDF = async (donationData, donorInfo) => {
-  // Create receipt HTML structure
-  const receiptHTML = createReceiptHTML(donationData, donorInfo);
-  
-  // Create a temporary div to hold the receipt
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = receiptHTML;
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  tempDiv.style.top = '-9999px';
-  tempDiv.style.width = '800px';
-  tempDiv.style.backgroundColor = 'white';
-  tempDiv.style.padding = '20px';
-  document.body.appendChild(tempDiv);
+  // Create receipt HTML markup string
+  const receiptHTML = createReceiptHTML(donationData, donorInfo)
+
+  // Create temporary hidden container div for HTML
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = receiptHTML
+  tempDiv.style.position = 'absolute'
+  tempDiv.style.left = '-9999px'
+  tempDiv.style.top = '-9999px'
+  tempDiv.style.width = '800px'
+  tempDiv.style.backgroundColor = 'white'
+  tempDiv.style.padding = '20px'
+  document.body.appendChild(tempDiv)
 
   try {
-    // Convert HTML to canvas
+    // Render the container HTML as canvas
     const canvas = await html2canvas(tempDiv, {
       scale: 2,
       backgroundColor: '#ffffff',
       useCORS: true,
-      allowTaint: true
-    });
+      allowTaint: true,
+    })
 
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgData = canvas.toDataURL('image/png');
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    
-    // Clean up
-    document.body.removeChild(tempDiv);
-    
-    return pdf;
+    // Create PDF from canvas and add image
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const imgData = canvas.toDataURL('image/png')
+
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+
+    // Clean up temporary div
+    document.body.removeChild(tempDiv)
+
+    return pdf
   } catch (error) {
-    document.body.removeChild(tempDiv);
-    throw error;
+    document.body.removeChild(tempDiv)
+    throw error
   }
-};
+}
 
+// Downloads the donation receipt PDF file
 export const downloadReceipt = async (donationData, donorInfo) => {
   try {
-    const pdf = await generateReceiptPDF(donationData, donorInfo);
-    const fileName = `donation-receipt-${donationData.transactionId}.pdf`;
-    pdf.save(fileName);
-    return true;
+    const pdf = await generateReceiptPDF(donationData, donorInfo)
+    const fileName = `donation-receipt-${donationData.transactionId}.pdf`
+    pdf.save(fileName)
+    return true
   } catch (error) {
-    console.error('Error generating receipt:', error);
-    return false;
+    console.error('Error generating receipt:', error)
+    return false
   }
-};
+}
 
+// Gets PDF Blob if you want to upload or store
 export const getReceiptBlob = async (donationData, donorInfo) => {
   try {
-    const pdf = await generateReceiptPDF(donationData, donorInfo);
-    return pdf.output('blob');
+    const pdf = await generateReceiptPDF(donationData, donorInfo)
+    return pdf.output('blob')
   } catch (error) {
-    console.error('Error generating receipt blob:', error);
-    return null;
+    console.error('Error generating receipt blob:', error)
+    return null
   }
-};
+}
 
+// Helper to create receipt HTML string with inline styles
 const createReceiptHTML = (donationData, donorInfo) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+      maximumFractionDigits: 0,
+    }).format(amount)
+  }
 
   const getCauseTitle = (cause) => {
     const causes = {
@@ -83,18 +87,18 @@ const createReceiptHTML = (donationData, donorInfo) => {
       food: 'Food & Nutrition',
       disaster: 'Disaster Relief',
       environment: 'Environmental Conservation',
-      elderly: 'Elderly Care'
-    };
-    return causes[cause] || 'General Fund';
-  };
+      elderly: 'Elderly Care',
+    }
+    return causes[cause] || 'General Fund'
+  }
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
-    });
-  };
+      day: 'numeric',
+    })
+  }
 
   return `
     <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: white;">
@@ -138,29 +142,27 @@ const createReceiptHTML = (donationData, donorInfo) => {
         <h3 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px;">Donor Information</h3>
         <div style="background: #fefefe; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">Name:</strong> 
+            <strong style="color: #374151;">Name:</strong>
             <span style="color: #1f2937;">${donorInfo.name}</span>
           </div>
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">Email:</strong> 
+            <strong style="color: #374151;">Email:</strong>
             <span style="color: #1f2937;">${donorInfo.email}</span>
           </div>
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">Phone:</strong> 
+            <strong style="color: #374151;">Phone:</strong>
             <span style="color: #1f2937;">${donorInfo.phone}</span>
           </div>
-          ${donorInfo.pan ? `
-          <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">PAN:</strong> 
-            <span style="color: #1f2937;">${donorInfo.pan}</span>
-          </div>
-          ` : ''}
-          ${donorInfo.address ? `
-          <div>
-            <strong style="color: #374151;">Address:</strong> 
-            <span style="color: #1f2937;">${donorInfo.address}</span>
-          </div>
-          ` : ''}
+          ${
+            donorInfo.pan
+              ? `<div style="margin-bottom: 10px;"><strong style="color: #374151;">PAN:</strong> <span style="color: #1f2937;">${donorInfo.pan}</span></div>`
+              : ''
+          }
+          ${
+            donorInfo.address
+              ? `<div><strong style="color: #374151;">Address:</strong> <span style="color: #1f2937;">${donorInfo.address}</span></div>`
+              : ''
+          }
         </div>
       </div>
 
@@ -180,7 +182,7 @@ const createReceiptHTML = (donationData, donorInfo) => {
             <span style="font-weight: 700; color: #374151; font-size: 18px;">Donation Amount:</span>
             <span style="color: #059669; font-weight: 700; font-size: 20px;">${formatCurrency(donationData.amount)}</span>
           </div>
-          
+
           <!-- Tax Benefit Calculation -->
           <div style="background: #ecfdf5; padding: 15px; border-radius: 6px; border-left: 4px solid #10b981;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -199,23 +201,23 @@ const createReceiptHTML = (donationData, donorInfo) => {
         <h3 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px;">Organization Details</h3>
         <div style="background: #fefefe; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">Organization:</strong> 
+            <strong style="color: #374151;">Organization:</strong>
             <span style="color: #1f2937;">Raavana Thalaigal Trust</span>
           </div>
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">Registration No:</strong> 
+            <strong style="color: #374151;">Registration No:</strong>
             <span style="color: #1f2937;">TN/12345/2020</span>
           </div>
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">80G Certificate No:</strong> 
+            <strong style="color: #374151;">80G Certificate No:</strong>
             <span style="color: #1f2937;">AAATD1234F20201</span>
           </div>
           <div style="margin-bottom: 10px;">
-            <strong style="color: #374151;">PAN:</strong> 
+            <strong style="color: #374151;">PAN:</strong>
             <span style="color: #1f2937;">AAATD1234F</span>
           </div>
           <div>
-            <strong style="color: #374151;">Address:</strong> 
+            <strong style="color: #374151;">Address:</strong>
             <span style="color: #1f2937;">123 Charity Street, NGO Nagar, Chennai - 600001, Tamil Nadu</span>
           </div>
         </div>
@@ -225,9 +227,31 @@ const createReceiptHTML = (donationData, donorInfo) => {
       <div style="text-align: center; padding-top: 20px; border-top: 2px solid #e5e7eb; color: #6b7280; font-size: 12px;">
         <p style="margin-bottom: 10px;">Thank you for your generous contribution to our cause!</p>
         <p style="margin-bottom: 10px;">This is a computer-generated receipt and does not require a signature.</p>
-        <p style="margin: 0;"><strong>For queries:</strong> contact@ravanathalaigaltrust.org | +91 98765 43210</p>
+        <p style="margin: 0;"><strong>For queries:</strong> <a href="mailto:contact@ravanathalaigaltrust.org" style="color:#2563eb;">contact@ravanathalaigaltrust.org</a> | +91 98765 43210</p>
         <p style="margin: 10px 0 0 0; color: #2563eb; font-weight: 600;">www.ravanathalaigaltrust.org</p>
       </div>
     </div>
-  `;
-};
+  `
+}
+
+// Helper called inside receipt content
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+const getCauseTitle = (cause) => {
+  const causes = {
+    education: 'Education for All',
+    healthcare: 'Healthcare & Medical Aid',
+    food: 'Food & Nutrition',
+    disaster: 'Disaster Relief',
+    environment: 'Environmental Conservation',
+    elderly: 'Elderly Care',
+  }
+  return causes[cause] || 'General Fund'
+}
